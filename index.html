@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- SEO & Meta Tags -->
+    <title>Reticula-Atelier - Zentangle Kaleidoskop Generator</title>
+    <meta name="description" content="Verwandle deine Zentangle-Zeichnungen in wunderschöne, nahtlose Kaleidoskop-Muster. Ein interaktives Online-Atelier für Künstler und Muster-Liebhaber.">
+    <meta name="keywords" content="Zentangle, Kaleidoskop, Muster, Design, Reticula, Atelier, Kunst, Zeichnung, Generator, Online-Tool, Kachel-Design, Symmetrie, meditative Kunst, Rapport, Kachel-Muster, Pattern Generator, Zentangle Art, Seamless Pattern, Tile Design, Digital Art Tool, Mandalas, Mirror Art">
+    <meta name="author" content="Ulrike Günther">
+    
+    <!-- Social Media Tags (Open Graph) -->
+    <meta property="og:title" content="Reticula-Atelier - Zentangle Edition">
+    <meta property="og:description" content="Erstelle faszinierende Kaleidoskope aus deinen eigenen Zeichnungen.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://reticula-atelier.netlify.app/">
+
+    <!-- Favicon (Original Zentangle-Logo) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b7355' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 4h16v16H4z' opacity='0.3' /%3E%3Cpath d='M4 8c4 0 4 4 8 4s4-4 8-4' /%3E%3Cpath d='M4 16c4 0 4 4 8 4s4-4 8-4' /%3E%3Cpath d='M8 4c0 4 4 4 4 8s-4 4-4 8' /%3E%3Cpath d='M16 4c0 4 4 4 4 8s-4 4-4 8' /%3E%3Ccircle cx='12' cy='12' r='2' fill='%238b7355' /%3E%3C/svg%3E">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+
+        body {
+            background-color: #dccdb0; 
+            color: #574438;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            overflow: hidden; 
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            touch-action: manipulation;
+        }
+
+        .sidebar-scroll {
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #bba98d transparent;
+            -webkit-overflow-scrolling: touch;
+        }
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: #bba98d; border-radius: 10px; }
+
+        #canvas-wrapper {
+            box-shadow: 0 20px 50px -12px rgba(87, 68, 56, 0.4);
+            border: 8px solid #f4ede0;
+            border-radius: 2px;
+            background-color: #f4ede0;
+            position: relative;
+            aspect-ratio: 1 / 1;
+            max-width: 100%;
+            max-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+        }
+        .collapsible-content.open {
+            max-height: 1200px;
+            opacity: 1;
+            margin-top: 0.2rem;
+        }
+        .chevron-icon { transition: transform 0.3s ease; }
+        .chevron-icon.rotated { transform: rotate(180deg); }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: #c5b496;
+            height: 4px;
+            border-radius: 10px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #8b7355; 
+            cursor: pointer;
+            border: 2px solid #f4ede0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .manual-input {
+            background-color: #f4ede0;
+            border: 1px solid #d1c2a8;
+            border-radius: 4px;
+            color: #574438;
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-align: center;
+            width: 3.5rem;
+            outline: none;
+            padding: 1px 0;
+            transition: border-color 0.2s;
+        }
+        .manual-input:focus {
+            border-color: #8b7355;
+            background-color: #fff;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .step-heading {
+            font-size: 0.7rem !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.1em !important;
+            color: #8b7355 !important;
+            margin: 0 !important;
+            line-height: 1.1 !important;
+        }
+
+        .tick-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: #8b7355;
+            width: 25px;
+            text-align: center;
+        }
+
+        .btn-export {
+            background-color: #8b7355;
+            color: #f4ede0;
+            transition: all 0.2s;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .btn-export:hover { background-color: #725e45; }
+        .btn-export:active { transform: scale(0.96); }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 20px;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider-round {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #c5b496;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider-round:before {
+            position: absolute;
+            content: "";
+            height: 14px; width: 14px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider-round { background-color: #8b7355; }
+        input:checked + .slider-round:before { transform: translateX(14px); }
+
+        #modal-overlay {
+            background-color: rgba(87, 68, 56, 0.6);
+            backdrop-filter: blur(4px);
+            transition: opacity 0.3s ease;
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        #modal-overlay.active {
+            display: flex;
+        }
+
+        /* Welcome Screen Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-welcome {
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Mobile Adjustments for Welcome Screen */
+        @media (max-width: 768px) {
+            #welcome-screen {
+                padding: 1.5rem !important;
+                overflow-y: auto !important;
+            }
+            #welcome-icon-box {
+                width: 3rem !important;
+                height: 3rem !important;
+                margin-bottom: 1rem !important;
+            }
+            #welcome-icon-box svg {
+                width: 1.5rem !important;
+                height: 1.5rem !important;
+            }
+            #welcome-title {
+                font-size: 1.25rem !important;
+                line-height: 1.2 !important;
+            }
+            #welcome-desc {
+                font-size: 0.75rem !important;
+                margin-bottom: 1.5rem !important;
+            }
+            #welcome-steps {
+                margin-bottom: 1.5rem !important;
+                gap: 1rem !important;
+            }
+            #welcome-steps span {
+                font-size: 8px !important;
+            }
+            #welcome-buttons {
+                gap: 0.75rem !important;
+            }
+            #welcome-privacy {
+                margin-top: 1.5rem !important;
+                font-size: 8px !important;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row h-screen overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="w-full md:w-96 bg-[#eee4d1] border-r border-[#d1c2a8] flex flex-col h-[45vh] md:h-full shadow-2xl shrink-0 overflow-hidden z-20">
+        
+        <!-- Header & Branding -->
+        <div class="p-6 pb-2 shrink-0">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-[#8b7355] rounded-xl flex items-center justify-center text-[#f4ede0] shadow-lg shrink-0">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+                            <path d="M4 4h16v16H4z" opacity="0.3" />
+                            <path d="M4 8c4 0 4 4 8 4s4-4 8-4" />
+                            <path d="M4 16c4 0 4 4 8 4s4-4 8-4" />
+                            <path d="M8 4c0 4 4 4 4 8s-4 4-4 8" />
+                            <path d="M16 4c0 4 4 4 4 8s-4 4-4 8" />
+                            <circle cx="12" cy="12" r="2" fill="currentColor" />
+                        </svg>
+                    </div>
+                    <h1 class="text-xl font-bold text-[#574438] tracking-tight leading-tight">Reticula-Atelier</h1>
+                </div>
+                <button onclick="showHelp('general')" class="text-[#8b7355] hover:text-[#574438] transition-colors">
+                    <i data-lucide="info" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <p class="text-[#8b7355] text-[10px] font-bold italic uppercase tracking-wider opacity-80 leading-tight">Erstelle ein Kaleidoskop aus deiner Zentangle-Zeichnung</p>
+        </div>
+
+        <div class="sidebar-scroll flex-1 p-6 pt-1 space-y-4">
+            
+            <!-- SCHRITT 1 -->
+            <section class="space-y-2">
+                <div class="section-header flex justify-between items-center cursor-pointer" onclick="toggleSection('basis-section', 'basis-chevron')">
+                    <div class="flex items-center gap-2">
+                        <h2 class="step-heading">1. Bild wählen</h2>
+                        <button onclick="event.stopPropagation(); showHelp('step1')" class="opacity-40 hover:opacity-100 transition-opacity">
+                            <i data-lucide="help-circle" class="w-3 h-3 text-[#8b7355]"></i>
+                        </button>
+                    </div>
+                    <i id="basis-chevron" data-lucide="chevron-down" class="w-4 h-4 text-[#bba98d] chevron-icon rotated"></i>
+                </div>
+                <div id="basis-section" class="collapsible-content open">
+                    <label class="flex flex-col items-center justify-center w-full h-14 border-2 border-[#c5b496] border-dashed rounded-2xl cursor-pointer hover:bg-[#e5d9c3] transition-all group">
+                        <div class="flex flex-col items-center gap-0.5">
+                            <i data-lucide="image-plus" class="text-[#bba98d] group-hover:text-[#8b7355] w-4 h-4 transition-colors"></i>
+                            <span class="text-[9px] font-bold text-[#8b7355]">Zeichnung laden</span>
+                        </div>
+                        <input id="upload" type="file" class="hidden" accept="image/*" />
+                    </label>
+                </div>
+            </section>
+
+            <!-- SCHRITT 2 -->
+            <section class="space-y-2 border-t border-[#d1c2a8] pt-3">
+                <div class="section-header flex justify-between items-center cursor-pointer" onclick="toggleSection('layout-section', 'layout-chevron')">
+                    <div class="flex items-center gap-2">
+                        <h2 class="step-heading">2. Muster gestalten</h2>
+                        <button onclick="event.stopPropagation(); showHelp('step2')" class="opacity-40 hover:opacity-100 transition-opacity">
+                            <i data-lucide="help-circle" class="w-3 h-3 text-[#8b7355]"></i>
+                        </button>
+                    </div>
+                    <i id="layout-chevron" data-lucide="chevron-down" class="w-4 h-4 text-[#bba98d] chevron-icon"></i>
+                </div>
+                <div id="layout-section" class="collapsible-content">
+                    <div class="space-y-5">
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <label class="text-[9px] font-bold text-[#574438] uppercase tracking-wider">Muster-Wiederholung</label>
+                                <div class="flex items-center gap-1">
+                                    <input id="grid-input" type="number" min="2" max="24" value="2" class="manual-input !text-[#574438]">
+                                    <span class="text-[#8b7355] text-[9px] font-bold">x</span>
+                                </div>
+                            </div>
+                            <input id="grid-size" type="range" min="2" max="24" value="2" class="w-full cursor-pointer">
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <label class="text-[9px] font-bold text-[#574438] uppercase tracking-wider">Muster drehen</label>
+                                <div class="flex items-center gap-1">
+                                    <input id="rotation-input" type="number" min="0" max="360" value="0" class="manual-input !text-[#574438]">
+                                    <span class="text-[#8b7355] text-[10px] font-bold">°</span>
+                                </div>
+                            </div>
+                            <div class="relative pb-4">
+                                <input id="rotation-slider" type="range" min="0" max="360" value="0" class="w-full cursor-pointer">
+                                <div class="flex justify-between px-0.5 mt-1">
+                                    <span class="tick-label">0°</span>
+                                    <span class="tick-label">90°</span>
+                                    <span class="tick-label">180°</span>
+                                    <span class="tick-label">270°</span>
+                                    <span class="tick-label">360°</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-[#e5d9c3] rounded-2xl p-2.5 border border-[#d1c2a8]">
+                            <label class="text-[8px] font-bold text-[#574438] uppercase tracking-widest block mb-2 text-center">Harmonie-Stil</label>
+                            <div class="grid grid-cols-2 gap-1.5">
+                                <button class="mode-btn active btn-export py-1.5 rounded-lg text-[8px] shadow-sm" data-mode="kaleidoscope">Kaleidoskop</button>
+                                <button class="mode-btn bg-[#f4ede0] border border-[#d1c2a8] text-[#8b7355] py-1.5 rounded-lg text-[8px] font-bold uppercase hover:bg-[#eee4d1]" data-mode="grid">Kacheln</button>
+                                <button class="mode-btn bg-[#f4ede0] border border-[#d1c2a8] text-[#8b7355] py-1.5 rounded-lg text-[8px] font-bold uppercase hover:bg-[#eee4d1]" data-mode="horizontal">Seiten-Echo</button>
+                                <button class="mode-btn bg-[#f4ede0] border border-[#d1c2a8] text-[#8b7355] py-1.5 rounded-lg text-[8px] font-bold uppercase hover:bg-[#eee4d1]" data-mode="vertical">Senkrecht-Echo</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SCHRITT 3 -->
+            <section id="source-adjustments-container" class="border-t border-[#d1c2a8] pt-3 space-y-2">
+                <div class="section-header flex justify-between items-center cursor-pointer" onclick="toggleSection('adjust-section', 'adjust-chevron')">
+                    <div class="flex items-center gap-2">
+                        <h2 class="step-heading">3. Ausschnitt anpassen</h2>
+                        <button onclick="event.stopPropagation(); showHelp('step3')" class="opacity-40 hover:opacity-100 transition-opacity">
+                            <i data-lucide="help-circle" class="w-3 h-3 text-[#8b7355]"></i>
+                        </button>
+                    </div>
+                    <i id="adjust-chevron" data-lucide="chevron-down" class="w-4 h-4 text-[#bba98d] chevron-icon"></i>
+                </div>
+                <div id="adjust-section" class="collapsible-content">
+                    <div class="space-y-4">
+                        <div class="flex justify-end">
+                            <button id="reset-source-btn" class="text-[8px] text-[#8b7355] font-bold uppercase tracking-wider flex items-center gap-1 hover:text-[#574438]">
+                                <i data-lucide="rotate-ccw" class="w-2.5 h-2.5"></i> Zurücksetzen
+                            </button>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-[9px] uppercase font-bold tracking-widest text-[#8b7355]">Gerade rücken</label>
+                                <div class="flex items-center gap-1">
+                                    <input id="src-rotation-input" type="number" min="-45" max="45" step="0.5" value="0.0" class="manual-input">
+                                    <span class="text-[#8b7355] text-[9px] font-bold">°</span>
+                                </div>
+                            </div>
+                            <input id="src-rotation-slider" type="range" min="-45" max="45" value="0" step="0.5" class="w-full">
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-[9px] uppercase font-bold tracking-widest text-[#8b7355]">Größe (Zoom)</label>
+                                <div class="flex items-center gap-1">
+                                    <input id="src-zoom-input" type="number" min="1" max="10" step="0.01" value="1.00" class="manual-input">
+                                    <span class="text-[#8b7355] text-[9px] font-bold">x</span>
+                                </div>
+                            </div>
+                            <input id="src-zoom-slider" type="range" min="1" max="10" step="0.01" value="1" class="w-full">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-[8px] uppercase font-bold tracking-widest text-[#8b7355] block mb-0.5 text-center">Horizontal</label>
+                                <input id="src-offx-slider" type="range" min="-100" max="100" step="0.1" value="0" class="w-full">
+                            </div>
+                            <div>
+                                <label class="text-[8px] uppercase font-bold tracking-widest text-[#8b7355] block mb-0.5 text-center">Vertikal</label>
+                                <input id="src-offy-slider" type="range" min="-100" max="100" step="0.1" value="0" class="w-full">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SCHRITT 4 -->
+            <section class="space-y-2 border-t border-[#d1c2a8] pt-3">
+                <div class="section-header flex justify-between items-center cursor-pointer" onclick="toggleSection('opt-section', 'opt-chevron')">
+                    <div class="flex items-center gap-2">
+                        <h2 class="step-heading">4. Bild-Optimierung</h2>
+                        <button onclick="event.stopPropagation(); showHelp('step4')" class="opacity-40 hover:opacity-100 transition-opacity">
+                            <i data-lucide="help-circle" class="w-3 h-3 text-[#8b7355]"></i>
+                        </button>
+                    </div>
+                    <i id="opt-chevron" data-lucide="chevron-down" class="w-4 h-4 text-[#bba98d] chevron-icon"></i>
+                </div>
+                <div id="opt-section" class="collapsible-content">
+                    <div class="space-y-3.5 bg-[#e5d9c3]/30 p-3 rounded-2xl border border-[#d1c2a8]/40 relative">
+                        <div class="flex justify-end -mb-0.5">
+                            <button id="reset-opt-btn" class="text-[8px] text-[#8b7355] font-bold uppercase tracking-wider flex items-center gap-1 hover:text-[#574438]">
+                                <i data-lucide="rotate-ccw" class="w-2.5 h-2.5"></i> zurücksetzen
+                            </button>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <div class="flex justify-between items-center mb-0.5">
+                                <label class="text-[9px] font-bold text-[#8b7355] uppercase tracking-wider">Helligkeit</label>
+                                <div class="flex items-center gap-1">
+                                    <input id="opt-brightness-input" type="number" min="50" max="150" value="100" class="manual-input">
+                                    <span class="text-[#8b7355] text-[9px] font-bold">%</span>
+                                </div>
+                            </div>
+                            <input id="opt-brightness" type="range" min="50" max="150" value="100" class="w-full">
+                        </div>
+
+                        <div class="filter-group">
+                            <div class="flex justify-between items-center mb-0.5">
+                                <label class="text-[9px] font-bold text-[#8b7355] uppercase tracking-wider">Kontrast</label>
+                                <div class="flex items-center gap-1">
+                                    <input id="opt-contrast-input" type="number" min="50" max="200" value="100" class="manual-input">
+                                    <span class="text-[#8b7355] text-[9px] font-bold">%</span>
+                                </div>
+                            </div>
+                            <input id="opt-contrast" type="range" min="50" max="200" value="100" class="w-full">
+                        </div>
+
+                        <div class="filter-group">
+                            <div class="flex justify-between items-center mb-0.5">
+                                <label class="text-[9px] font-bold text-[#8b7355] uppercase tracking-wider">Sättigung</label>
+                                <div class="flex items-center gap-1">
+                                    <input id="opt-saturation-input" type="number" min="0" max="200" value="100" class="manual-input">
+                                    <span class="text-[#8b7355] text-[9px] font-bold">%</span>
+                                </div>
+                            </div>
+                            <input id="opt-saturation" type="range" min="0" max="200" value="100" class="w-full">
+                        </div>
+
+                        <div class="filter-group">
+                            <div class="flex justify-between items-center mb-0.5">
+                                <label class="text-[9px] font-bold text-[#8b7355] uppercase tracking-wider">Wärme</label>
+                                <div class="flex items-center gap-1">
+                                    <input id="opt-warmth-input" type="number" min="0" max="100" value="0" class="manual-input">
+                                    <span class="text-[#8b7355] text-[9px] font-bold">%</span>
+                                </div>
+                            </div>
+                            <input id="opt-warmth" type="range" min="0" max="100" value="0" class="w-full">
+                        </div>
+
+                        <div class="pt-1.5 border-t border-[#d1c2a8]/50">
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="opt-threshold-toggle">
+                                        <span class="slider-round"></span>
+                                    </label>
+                                    <label class="text-[9px] font-bold text-[#574438] uppercase tracking-widest">Tusche-Modus</label>
+                                </div>
+                            </div>
+                            <div id="threshold-slider-box" class="opacity-40 pointer-events-none transition-opacity">
+                                <div class="flex justify-between items-center mb-0.5">
+                                    <label class="text-[8px] font-bold text-[#8b7355] uppercase">Schwellenwert</label>
+                                    <div class="flex items-center gap-1">
+                                        <input id="opt-threshold-input" type="number" min="10" max="245" value="128" class="manual-input">
+                                    </div>
+                                </div>
+                                <input id="opt-threshold" type="range" min="10" max="245" value="128" class="w-full">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SCHRITT 5 -->
+            <section class="space-y-2 border-t border-[#d1c2a8] pt-3 pb-4">
+                <div class="section-header flex justify-between items-center cursor-pointer" onclick="toggleSection('save-section', 'save-chevron')">
+                    <div class="flex items-center gap-2">
+                        <h2 class="step-heading">5. Speichern</h2>
+                        <button onclick="event.stopPropagation(); showHelp('step5')" class="opacity-40 hover:opacity-100 transition-opacity">
+                            <i data-lucide="help-circle" class="w-3 h-3 text-[#8b7355]"></i>
+                        </button>
+                    </div>
+                    <i id="save-chevron" data-lucide="chevron-down" class="w-4 h-4 text-[#bba98d] chevron-icon rotated"></i>
+                </div>
+                <div id="save-section" class="collapsible-content open">
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-1 gap-2">
+                            <button id="save-png-btn" class="btn-export py-2.5 px-4 rounded-xl text-[10px] flex items-center justify-center gap-3 tracking-widest shadow-sm">
+                                <i data-lucide="image" class="w-4 h-4"></i> Als PNG speichern
+                            </button>
+                            <button id="save-jpg-btn" class="bg-[#574438] text-[#f4ede0] py-2.5 px-4 rounded-xl font-bold text-[10px] uppercase flex items-center justify-center gap-3 hover:bg-[#3d2f26] transition-all shadow-md active:scale-95 tracking-widest">
+                                <i data-lucide="camera" class="w-4 h-4"></i> Als JPG speichern
+                            </button>
+                            <button id="save-pdf-btn" class="bg-[#6f5a43] text-[#f4ede0] py-2.5 px-4 rounded-xl font-bold text-[10px] uppercase flex items-center justify-center gap-3 hover:bg-[#574438] transition-all shadow-md active:scale-95 tracking-widest">
+                                <i data-lucide="file-text" class="w-4 h-4"></i> PDF-Kollektion (A4)
+                            </button>
+                        </div>
+                        <p id="download-hint" class="text-[9px] text-[#8b7355] font-bold italic opacity-0 text-center transition-opacity">Export bereit!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SUPPORT & INFO -->
+            <section class="pt-3 border-t border-[#d1c2a8] space-y-2.5 pb-2">
+                <h3 class="step-heading opacity-60">Support & Info</h3>
+                <div class="flex gap-2">
+                    <a href="https://paypal.me/UliGausD" target="_blank" class="flex-1 bg-[#8b7355]/10 border border-[#8b7355]/20 p-1.5 rounded-xl flex items-center justify-center gap-2 text-[#8b7355] hover:bg-[#8b7355]/20 transition-all">
+                        <i data-lucide="coffee" class="w-3.5 h-3.5"></i>
+                        <span class="text-[9px] font-bold uppercase tracking-widest">Kaffee spenden</span>
+                    </a>
+                </div>
+                <p class="text-[9px] text-[#8b7355] leading-relaxed px-1">
+                    Diese App ist kostenlos nutzbar. Wenn du die bisherige Arbeit dahinter schätzt und ihre Weiterentwicklung unterstützen möchtest, freue ich mich über eine kleine Unterstützung.
+                </p>
+                <div class="flex flex-col gap-1.5 px-1">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[8px] font-bold text-[#8b7355]/60 uppercase tracking-widest">v1.3.1 • 2026-03-08</span>
+                        <span class="text-[8px] font-bold text-[#8b7355]/60 italic">© Reticula-Atelier</span>
+                    </div>
+                    <div class="text-[7px] text-[#8b7355]/50 text-center font-bold uppercase tracking-tighter leading-tight border-t border-[#d1c2a8]/30 pt-1">
+                        Erstellt von Ulrike Günther
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </aside>
+
+    <!-- ARBEITSBEREICH -->
+    <main class="flex-1 flex flex-col min-w-0 bg-[#dccdb0] relative h-full md:h-screen overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(#bba98d_1px,transparent_1px)] [background-size:32px_32px] opacity-20 pointer-events-none"></div>
+
+        <div class="flex-1 flex items-center justify-center p-4 md:p-10 z-10 min-h-0">
+            <div id="canvas-wrapper">
+                <!-- Welcome Screen -->
+                <div id="welcome-screen" class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-[#f4ede0] z-20 animate-welcome">
+                    <div id="welcome-icon-box" class="w-20 h-20 bg-[#8b7355]/10 rounded-3xl flex items-center justify-center text-[#8b7355] mb-6 shadow-inner shrink-0">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10">
+                            <path d="M4 4h16v16H4z" opacity="0.3" />
+                            <path d="M4 8c4 0 4 4 8 4s4-4 8-4" />
+                            <path d="M4 16c4 0 4 4 8 4s4-4 8-4" />
+                            <path d="M8 4c0 4 4 4 4 8s-4 4-4 8" />
+                            <path d="M16 4c0 4 4 4 4 8s-4 4-4 8" />
+                            <circle cx="12" cy="12" r="2" fill="currentColor" />
+                        </svg>
+                    </div>
+                    <h2 id="welcome-title" class="text-2xl font-bold text-[#574438] mb-2 leading-tight">Willkommen im Reticula-Atelier</h2>
+                    <p id="welcome-desc" class="text-sm text-[#8b7355] max-w-sm mb-10 leading-relaxed font-medium">
+                        Verwandle deine Zentangle®-Zeichnungen in faszinierende, nahtlose Kaleidoskop-Muster für deine Kunstprojekte.
+                    </p>
+                    
+                    <div id="welcome-steps" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 w-full max-w-lg shrink-0">
+                        <div class="flex flex-col items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-[#8b7355] text-white flex items-center justify-center text-xs font-bold">1</div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-[#574438]">Hochladen</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-[#8b7355] text-white flex items-center justify-center text-xs font-bold">2</div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-[#574438]">Gestalten</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-[#8b7355] text-white flex items-center justify-center text-xs font-bold">3</div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-[#574438]">Exportieren</span>
+                        </div>
+                    </div>
+
+                    <div id="welcome-buttons" class="flex flex-col sm:flex-row gap-4 shrink-0">
+                        <button onclick="document.getElementById('upload').click()" class="btn-export py-3 px-8 rounded-2xl text-xs flex items-center gap-3 shadow-lg">
+                            <i data-lucide="upload-cloud" class="w-4 h-4"></i> Zeichnung wählen
+                        </button>
+                        <button id="load-example-btn" class="bg-white border-2 border-[#8b7355] text-[#8b7355] py-3 px-8 rounded-2xl text-xs font-bold uppercase tracking-wider hover:bg-[#8b7355]/5 transition-all flex items-center gap-3">
+                            <i data-lucide="eye" class="w-4 h-4"></i> Beispiel
+                        </button>
+                    </div>
+
+                    <p id="welcome-privacy" class="text-[10px] text-[#8b7355] mt-6 max-w-sm leading-relaxed opacity-80 shrink-0">
+                        <strong>Diese App läuft vollständig in deinem Browser. Deine Bilder bleiben auf deinem Gerät,</strong> werden nicht hochgeladen und nicht auf einem Server gespeichert.
+                    </p>
+                </div>
+
+                <canvas id="canvas"></canvas>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Fenster -->
+    <div id="modal-overlay" onclick="closeModal()">
+        <!-- Erhöhte Breite auf max-w-4xl für bessere Sichtbarkeit der Grafik -->
+        <div class="bg-[#f4ede0] w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden border border-[#d1c2a8] m-4" onclick="event.stopPropagation()">
+            <div class="p-6 bg-[#eee4d1] border-b border-[#d1c2a8] flex justify-between items-center">
+                <h3 id="modal-title" class="step-heading text-[#8b7355]">Atelier-Hilfe</h3>
+                <button onclick="closeModal()" class="text-[#8b7355] hover:text-[#574438] transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto max-h-[80vh]">
+                <div id="modal-image-container" class="hidden mb-6 flex flex-col items-center">
+                    <img id="modal-image-preview" src="" class="max-w-full rounded-lg shadow-lg border border-[#d1c2a8] mb-4">
+                    <div id="pdf-mobile-link" class="hidden my-6">
+                        <a id="pdf-blob-link" target="_blank" class="btn-export py-3 px-8 rounded-2xl text-xs flex items-center justify-center gap-3 shadow-lg no-underline">
+                            <i data-lucide="external-link" class="w-4 h-4"></i> PDF jetzt öffnen & sichern
+                        </a>
+                    </div>
+                    <p id="modal-image-hint" class="text-[10px] font-bold text-[#a64d4d] uppercase tracking-widest text-center">
+                        Bild gedrückt halten & "In Fotos sichern" wählen
+                    </p>
+                </div>
+                <p id="modal-content" class="text-sm text-[#574438] leading-relaxed"></p>
+                <div class="mt-8 flex justify-end">
+                    <button onclick="closeModal()" class="btn-export py-2 px-6 rounded-xl text-[10px]">Schließen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notification" class="fixed bottom-10 right-10 px-6 py-3 rounded-2xl shadow-2xl z-50 flex items-center gap-4 bg-[#f4ede0] border border-[#d1c2a8] pointer-events-none opacity-0 transition-all transform translate-y-10">
+        <div id="notif-icon-box" class="w-8 h-8 rounded-full flex items-center justify-center bg-[#8b7355] text-[#f4ede0] shadow-inner">
+            <i id="notif-icon" class="w-4 h-4"></i>
+        </div>
+        <span id="notif-text" class="font-bold text-[#574438] text-xs"></span>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const upload = document.getElementById("upload");
+        const gridSizeInput = document.getElementById("grid-size");
+        const gridNumberInput = document.getElementById("grid-input");
+        const rotationSlider = document.getElementById("rotation-slider");
+        const rotationInput = document.getElementById("rotation-input");
+        const modeBtns = document.querySelectorAll(".mode-btn");
+        const savePngBtn = document.getElementById("save-png-btn");
+        const saveJpgBtn = document.getElementById("save-jpg-btn");
+        const savePdfBtn = document.getElementById("save-pdf-btn");
+        const notification = document.getElementById("notification");
+        const downloadHint = document.getElementById("download-hint");
+        const resetSourceBtn = document.getElementById("reset-source-btn");
+        
+        const optBrightness = document.getElementById("opt-brightness");
+        const optContrast = document.getElementById("opt-contrast");
+        const optSaturation = document.getElementById("opt-saturation");
+        const optWarmth = document.getElementById("opt-warmth");
+        const optThreshold = document.getElementById("opt-threshold");
+        const optThresholdToggle = document.getElementById("opt-threshold-toggle");
+        const thresholdSliderBox = document.getElementById("threshold-slider-box");
+        const resetOptBtn = document.getElementById("reset-opt-btn");
+
+        const modalOverlay = document.getElementById("modal-overlay");
+        const modalTitle = document.getElementById("modal-title");
+        const modalContent = document.getElementById("modal-content");
+        const modalImageContainer = document.getElementById("modal-image-container");
+        const modalImagePreview = document.getElementById("modal-image-preview");
+        const modalImageHint = document.getElementById("modal-image-hint");
+        const welcomeScreen = document.getElementById("welcome-screen");
+        const loadExampleBtn = document.getElementById("load-example-btn");
+
+        let rawImg = null; 
+        let processedSourceCanvas = document.createElement('canvas'); 
+        let psCtx = processedSourceCanvas.getContext('2d');
+        
+        let currentMode = 'kaleidoscope';
+        let currentRotation = 0;
+        let currentZoom = 1.0;
+        let currentOffX = 0, currentOffY = 0, sourceRotation = 0;
+        let filters = { brightness: 100, contrast: 100, saturation: 100, warmth: 0, thresholdActive: false, thresholdValue: 128 };
+        let renderPending = false;
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        const helpTexts = {
+            general: { title: "Was ist Reticula-Atelier?", text: "Das Reticula-Atelier verwandelt deine Zentangle-Zeichnungen in präzise Kaleidoskop-Muster. Lade einfach ein Foto hoch, wähle einen Stil und erstelle komplexe Strukturen." },
+            step1: { title: "Schritt 1: Bild laden", text: "Wähle ein Foto deines Zentangles. Das Bild wird lokal in deinem Browser verarbeitet." },
+            step2: { title: "Schritt 2: Muster gestalten", text: "Die 'Wiederholung' bestimmt das Raster. 'Seiten-Echo' spiegelt horizontal, 'Senkrecht-Echo' vertikal." },
+            step3: { title: "Schritt 3: Ausschnitt anpassen", text: "Drehe und verschiebe dein Originalfoto innerhalb der Kachel, um den Fokuspunkt zu finden." },
+            step4: { title: "Schritt 4: Optimierung", text: "Hier gibst du dem Muster den letzten Schliff. Erhöhe den Kontrast für kräftige Linien. Der Tusche-Modus sorgt für einen harten Schwarz-Weiß-Look." },
+            step5: { title: "Schritt 5: Speichern", text: "Exportiere dein Muster als Einzelbild (PNG/JPG) für digitale Medien oder erstelle eine PDF-Kollektion. Das PDF ist ideal für den Ausdruck deiner eigenen Zentangle-Kacheln optimiert." }
+        };
+
+        function scheduleUpdate() {
+            if (renderPending) return;
+            renderPending = true;
+            requestAnimationFrame(() => { updateSourceBuffer(); renderPending = false; });
+        }
+
+        function applyManualOptimizations(ctx, w, h) {
+            const imgData = ctx.getImageData(0, 0, w, h);
+            const d = imgData.data;
+            const bright = filters.brightness / 100, contrast = filters.contrast / 100, saturation = filters.saturation / 100, warmth = filters.warmth / 100;
+            for (let i = 0; i < d.length; i += 4) {
+                let r = d[i], g = d[i+1], b = d[i+2];
+                r *= bright; g *= bright; b *= bright;
+                r = (r - 128) * contrast + 128; g = (g - 128) * contrast + 128; b = (b - 128) * contrast + 128;
+                if (warmth > 0) {
+                    let tr = 0.393*r + 0.769*g + 0.189*b, tg = 0.349*r + 0.686*g + 0.168*b, tb = 0.272*r + 0.534*g + 0.131*b;
+                    r += (tr - r) * warmth; g += (tg - g) * warmth; b += (tb - b) * warmth;
+                }
+                if (saturation !== 1) {
+                    let gray = 0.2126*r + 0.7152*g + 0.0722*b;
+                    r = gray + (r - gray) * saturation; g = gray + (g - gray) * saturation; b = gray + (gray - gray) * saturation;
+                }
+                if (filters.thresholdActive) {
+                    let v = (0.2126*r + 0.7152*g + 0.0722*b) >= filters.thresholdValue ? 255 : 0;
+                    r = g = b = v;
+                }
+                d[i] = Math.min(255, Math.max(0, r)); d[i+1] = Math.min(255, Math.max(0, g)); d[i+2] = Math.min(255, Math.max(0, b));
+            }
+            ctx.putImageData(imgData, 0, 0);
+        }
+
+        window.showHelp = (key) => {
+            const info = helpTexts[key]; modalTitle.innerText = info.title; modalContent.innerText = info.text;
+            modalImageContainer.classList.add("hidden"); modalOverlay.classList.add("active"); lucide.createIcons();
+        };
+
+        window.showSavePreview = (dataUrl, format, isPdf = false) => {
+            modalTitle.innerText = isPdf ? "PDF Kollektion" : "Bild Speichern"; 
+            modalContent.innerText = isPdf ? "Deine PDF-Kollektion wurde erstellt." : "Das " + format + "-Bild wurde generiert.";
+            
+            const pdfLinkBox = document.getElementById("pdf-mobile-link");
+            const pdfBlobLink = document.getElementById("pdf-blob-link");
+            
+            if (isPdf) {
+                modalImagePreview.classList.add("hidden");
+                pdfLinkBox.classList.remove("hidden");
+                pdfBlobLink.href = dataUrl;
+                modalImageHint.style.display = 'none';
+            } else {
+                modalImagePreview.src = dataUrl; 
+                modalImagePreview.classList.remove("hidden");
+                pdfLinkBox.classList.add("hidden");
+                modalImageHint.style.display = 'block';
+            }
+            
+            modalImageContainer.classList.remove("hidden"); 
+            modalOverlay.classList.add("active"); 
+            lucide.createIcons();
+        };
+
+        window.closeModal = () => modalOverlay.classList.remove("active");
+
+        window.toggleSection = (sid, cid, force = null) => {
+            const content = document.getElementById(sid), chevron = document.getElementById(cid);
+            let open = force !== null ? force : !content.classList.contains('open');
+            if (open) { content.classList.add('open'); chevron?.classList.add('rotated'); } 
+            else { content.classList.remove('open'); chevron?.classList.remove('rotated'); }
+        };
+
+        function showNotification(msg, type = 'success') {
+            const icon = document.getElementById("notif-icon"), text = document.getElementById("notif-text"), box = document.getElementById("notif-icon-box");
+            text.innerText = msg; box.className = `w-8 h-8 rounded-full flex items-center justify-center ${type === 'success' ? 'bg-[#8b7355]' : 'bg-[#a64d4d]'} text-[#f4ede0] shadow-inner`;
+            icon.setAttribute("data-lucide", type === 'success' ? "check" : "alert-circle"); notification.classList.add('opacity-100', 'translate-y-0');
+            lucide.createIcons(); setTimeout(() => notification.classList.remove('opacity-100', 'translate-y-0'), 3000);
+        }
+
+        function initCanvas() { canvas.width = 1600; canvas.height = 1600; processedSourceCanvas.width = 800; processedSourceCanvas.height = 800; }
+        initCanvas();
+
+        function updateSourceBuffer() {
+            if (!rawImg) return;
+            psCtx.clearRect(0, 0, 800, 800); psCtx.save();
+            psCtx.translate(400, 400); psCtx.rotate(sourceRotation * Math.PI / 180); psCtx.scale(currentZoom, currentZoom);
+            psCtx.translate((currentOffX/100)*800/currentZoom, (currentOffY/100)*800/currentZoom); psCtx.translate(-400, -400);
+            const aspect = rawImg.width / rawImg.height;
+            let dw, dh; if (aspect > 1) { dh = 800; dw = dh * aspect; } else { dw = 800; dh = dw / aspect; }
+            psCtx.drawImage(rawImg, (800 - dw) / 2, (800 - dh) / 2, dw, dh); psCtx.restore();
+            applyManualOptimizations(psCtx, 800, 800); drawPattern();
+        }
+
+        function drawPattern() {
+            if (!rawImg) return;
+            const grid = parseInt(gridSizeInput.value), size = canvas.width / grid, rotRad = currentRotation * Math.PI / 180;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let x = 0; x < grid; x++) {
+                for (let y = 0; y < grid; y++) {
+                    ctx.save(); ctx.translate(x * size, y * size);
+                    let flipH = (currentMode === 'kaleidoscope' || currentMode === 'horizontal') && (x % 2 === 1);
+                    let flipV = (currentMode === 'kaleidoscope' || currentMode === 'vertical') && (y % 2 === 1);
+                    if (flipH) { ctx.translate(size, 0); ctx.scale(-1, 1); }
+                    if (flipV) { ctx.translate(0, size); ctx.scale(1, -1); }
+                    ctx.translate(size/2, size/2); ctx.rotate(rotRad); ctx.translate(-size/2, -size/2);
+                    ctx.drawImage(processedSourceCanvas, 0, 0, size, size); ctx.restore();
+                }
+            }
+        }
+
+        function triggerDownload(dataUrl, filename, format) {
+            try {
+                if (isMobile) { 
+                    showSavePreview(dataUrl, format); 
+                } else { 
+                    const link = document.createElement('a'); 
+                    link.href = dataUrl; 
+                    link.download = filename; 
+                    document.body.appendChild(link); 
+                    link.click(); 
+                    document.body.removeChild(link); 
+                    showNotification("Bild gespeichert!"); 
+                }
+                downloadHint.classList.add('opacity-100');
+            } catch(e) {
+                showNotification("Speichern fehlgeschlagen (RAM Limit). Versuche JPG.", "error");
+            }
+        }
+
+        const srcRotS = document.getElementById("src-rotation-slider"), srcRotI = document.getElementById("src-rotation-input");
+        const srcZmS = document.getElementById("src-zoom-slider"), srcZmI = document.getElementById("src-zoom-input");
+        const srcOffX = document.getElementById("src-offx-slider"), srcOffY = document.getElementById("src-offy-slider");
+
+        function sync(s, i, cb, fl = false) {
+            s.oninput = (e) => { const v = fl ? parseFloat(e.target.value) : parseInt(e.target.value); if(i) i.value = fl ? v.toFixed(2) : v; cb(v); };
+            if(i && i.oninput !== undefined) i.oninput = (e) => { let v = (fl ? parseFloat(e.target.value) : parseInt(e.target.value)) || 0; v = Math.max(s.min, Math.min(s.max, v)); s.value = v; cb(v); };
+        }
+
+        sync(srcRotS, srcRotI, (v) => { sourceRotation = v; scheduleUpdate(); }, true);
+        sync(srcZmS, srcZmI, (v) => { currentZoom = v; scheduleUpdate(); }, true);
+        srcOffX.oninput = (e) => { currentOffX = parseFloat(e.target.value); scheduleUpdate(); };
+        srcOffY.oninput = (e) => { currentOffY = parseFloat(e.target.value); scheduleUpdate(); };
+        sync(gridSizeInput, gridNumberInput, () => scheduleUpdate());
+        sync(optBrightness, document.getElementById("opt-brightness-input"), (v) => { filters.brightness = v; scheduleUpdate(); });
+        sync(optContrast, document.getElementById("opt-contrast-input"), (v) => { filters.contrast = v; scheduleUpdate(); });
+        sync(document.getElementById("opt-saturation"), document.getElementById("opt-saturation-input"), (v) => { filters.saturation = v; scheduleUpdate(); });
+        sync(document.getElementById("opt-warmth"), document.getElementById("opt-warmth-input"), (v) => { filters.warmth = v; scheduleUpdate(); });
+        sync(optThreshold, document.getElementById("opt-threshold-input"), (v) => { filters.thresholdValue = v; scheduleUpdate(); });
+
+        rotationSlider.oninput = (e) => {
+            let v = parseInt(e.target.value); [0, 90, 180, 270, 360].forEach(s => { if(Math.abs(v-s)<=5) v=s; });
+            currentRotation = v; rotationSlider.value = v; rotationInput.value = v; scheduleUpdate();
+        };
+        rotationInput.oninput = (e) => { let v = Math.max(0, Math.min(360, parseInt(e.target.value) || 0)); currentRotation = v; rotationSlider.value = v; scheduleUpdate(); };
+
+        function handleImage(src) {
+            const img = new Image();
+            img.onerror = () => {
+                showNotification("Bild konnte nicht geladen werden. Liegt 'beispiel-tangle.jpg' im Ordner?", "error");
+            };
+            img.src = src;
+            img.onload = () => {
+                rawImg = img;
+                welcomeScreen.style.display = 'none';
+                scheduleUpdate();
+                showNotification("Bild bereit!");
+                toggleSection('basis-section', 'basis-chevron', false);
+                toggleSection('layout-section', 'layout-chevron', true);
+            };
+        }
+
+        upload.onchange = (e) => {
+            const f = e.target.files[0];
+            if (!f) return;
+            handleImage(URL.createObjectURL(f));
+        };
+
+        loadExampleBtn.onclick = () => {
+            modalTitle.innerText = "Vorgehen"; // Titel wie gewünscht angepasst
+            modalContent.innerText = "";
+            modalImagePreview.src = "beispiel-tangle.jpg";
+            modalImagePreview.classList.remove("hidden");
+            document.getElementById("pdf-mobile-link").classList.add("hidden");
+            modalImageHint.style.display = 'none';
+            modalImageContainer.classList.remove("hidden");
+            modalOverlay.classList.add("active");
+            lucide.createIcons();
+        };
+
+        resetSourceBtn.onclick = () => { sourceRotation = 0; currentZoom = 1.0; currentOffX = 0; currentOffY = 0; srcRotS.value = 0; srcRotI.value = "0.0"; srcZmS.value = 1.0; srcZmI.value = "1.00"; srcOffX.value = 0; srcOffY.value = 0; scheduleUpdate(); showNotification("Ausschnitt zurückgesetzt."); };
+
+        modeBtns.forEach(btn => btn.onclick = () => { modeBtns.forEach(b => b.className = "mode-btn bg-[#f4ede0] border border-[#d1c2a8] text-[#8b7355] py-1.5 rounded-lg text-[8px] font-bold uppercase hover:bg-[#eee4d1]"); btn.className = "mode-btn active btn-export py-1.5 rounded-lg text-[8px] shadow-sm"; currentMode = btn.dataset.mode; scheduleUpdate(); });
+
+        optThresholdToggle.onchange = (e) => { filters.thresholdActive = e.target.checked; thresholdSliderBox.classList.toggle('opacity-40', !e.target.checked); thresholdSliderBox.classList.toggle('pointer-events-none', !e.target.checked); scheduleUpdate(); };
+        
+        resetOptBtn.onclick = () => { 
+            filters = { brightness: 100, contrast: 100, saturation: 100, warmth: 0, thresholdActive: false, thresholdValue: 128 }; 
+            optBrightness.value = 100; optContrast.value = 100; optThresholdToggle.checked = false; thresholdSliderBox.classList.add('opacity-40', 'pointer-events-none'); 
+            scheduleUpdate(); showNotification("Werte zurückgesetzt."); 
+        };
+
+        savePngBtn.onclick = () => { 
+            if(!rawImg) return showNotification("Kein Bild!", "error"); 
+            try {
+                triggerDownload(canvas.toDataURL('image/png'), 'reticula-tile.png', 'PNG');
+            } catch(e) {
+                showNotification("RAM erschöpft. Nutze JPG.", "error");
+            }
+        };
+
+        saveJpgBtn.onclick = () => { 
+            if(!rawImg) return showNotification("Kein Bild!", "error"); 
+            const ec = document.createElement('canvas'); ec.width = canvas.width; ec.height = canvas.height; const ectx = ec.getContext('2d'); ectx.fillStyle = "#fff"; ectx.fillRect(0,0,ec.width,ec.height); ectx.drawImage(canvas, 0, 0); 
+            triggerDownload(ec.toDataURL('image/jpeg', 0.85), 'reticula-tile.jpg', 'JPG'); 
+        };
+
+        savePdfBtn.onclick = async () => {
+            if (!rawImg) return showNotification("Kein Bild!", "error");
+            showNotification("PDF wird erstellt...");
+            
+            try {
+                const { jsPDF } = window.jspdf; 
+                const doc = new jsPDF('p', 'mm', 'a4'); 
+                const imgData = canvas.toDataURL('image/jpeg', 0.75);
+                
+                for(let r=0; r<3; r++) for(let c=0; c<2; c++) { 
+                    doc.addImage(imgData, 'JPEG', 10 + c*95, 10 + r*92, 90, 90); 
+                    doc.setDrawColor(187, 169, 141); 
+                    doc.rect(10 + c*95, 10 + r*92, 90, 90); 
+                }
+                doc.setFontSize(8); doc.setTextColor(139, 115, 85); doc.text("Erstellt mit Reticula-Atelier", 105, 292, { align: 'center' });
+                doc.addPage(); doc.addImage(imgData, 'JPEG', 20, 40, 170, 170); doc.setDrawColor(139, 115, 85); doc.setLineWidth(0.5); doc.rect(20, 40, 170, 170); doc.text("Erstellt mit Reticula-Atelier", 105, 292, { align: 'center' });
+                
+                if (isMobile) {
+                    const blob = doc.output('bloburl');
+                    showSavePreview(blob, 'PDF', true);
+                } else {
+                    doc.save(`reticula-zentangle-kollektion.pdf`); 
+                    showNotification("PDF gespeichert!"); 
+                    downloadHint.classList.add('opacity-100');
+                }
+            } catch(e) {
+                showNotification("PDF Fehler (Gerät zu schwach).", "error");
+            }
+        };
+
+        window.onload = () => { lucide.createIcons(); initCanvas(); };
+    </script>
+</body>
+</html>
