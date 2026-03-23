@@ -423,6 +423,19 @@
                                 <input id="src-offy-slider" type="range" min="-100" max="100" step="0.1" value="0" class="w-full">
                             </div>
                         </div>
+                        <!-- Neue Regler für Perspektive -->
+                        <div class="pt-2 border-t border-[#d1c2a8]/30">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label id="ui-persp-h-label" class="text-[8px] uppercase font-bold tracking-widest text-[#8b7355] block mb-0.5 text-center">Persp. Horiz.</label>
+                                    <input id="src-persp-h-slider" type="range" min="-0.5" max="0.5" step="0.01" value="0" class="w-full">
+                                </div>
+                                <div>
+                                    <label id="ui-persp-v-label" class="text-[8px] uppercase font-bold tracking-widest text-[#8b7355] block mb-0.5 text-center">Persp. Vert.</label>
+                                    <input id="src-persp-v-slider" type="range" min="-0.5" max="0.5" step="0.01" value="0" class="w-full">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -560,7 +573,7 @@
                 </p>
                 <div class="flex flex-col gap-1.5 px-1 pt-1">
                     <div class="flex justify-between items-center">
-                        <span id="ui-version" class="text-[8px] font-bold text-[#8b7355]/60 uppercase tracking-widest">v1.3.2 • 14.03.2026</span>
+                        <span id="ui-version" class="text-[8px] font-bold text-[#8b7355]/60 uppercase tracking-widest">v1.3.3 • 14.03.2026</span>
                         <span class="text-[8px] font-bold text-[#8b7355]/60 italic">© Reticula-Atelier</span>
                     </div>
                     <div id="ui-author" class="text-[7px] text-[#8b7355]/50 text-center font-bold uppercase tracking-tighter leading-tight border-t border-[#d1c2a8]/30 pt-1">
@@ -684,6 +697,8 @@
                 zoomLabel: "Größe (Zoom)",
                 horizontalLabel: "Horizontal",
                 verticalLabel: "Vertikal",
+                perspHLabel: "Persp. Horiz.",
+                perspVLabel: "Persp. Vert.",
                 brightnessLabel: "Helligkeit",
                 contrastLabel: "Kontrast",
                 saturationLabel: "Sättigung",
@@ -699,7 +714,7 @@
                 supportText: "Diese App ist kostenlos nutzbar. Wenn du die bisherige Arbeit dahinter schätzt und ihre Weiterentwicklung unterstützen möchtest, freue ich mich über eine kleine Unterstützung.",
                 privacyText: "Privatsphäre: Deine Bilder werden nicht auf einen Server hochgeladen. Die gesamte Verarbeitung findet sicher und lokal in deinem Browser statt.",
                 author: "Erstellt von Ulrike Günther",
-                versionLabel: "v1.3.2 • 14.03.2026",
+                versionLabel: "v1.3.3 • 14.03.2026",
                 welcomeTitle: "Willkommen im Reticula-Atelier",
                 welcomeDesc: "Verwandle deine Zentangle®-Zeichnungen in faszinierende, nahtlose Kaleidoskop-Muster für deine Kunstprojekte.",
                 welcomeStep1: "Hochladen",
@@ -748,6 +763,8 @@
                 zoomLabel: "Size (Zoom)",
                 horizontalLabel: "Horizontal",
                 verticalLabel: "Vertical",
+                perspHLabel: "Persp. Horiz.",
+                perspVLabel: "Persp. Vert.",
                 brightnessLabel: "Brightness",
                 contrastLabel: "Contrast",
                 saturationLabel: "Saturation",
@@ -763,7 +780,7 @@
                 supportText: "This app is free to use. If you appreciate the work and want to support its development, I would be grateful for a small donation.",
                 privacyText: "Privacy: Your images are never uploaded to a server. All processing happens securely and locally within your browser.",
                 author: "Created by Ulrike Günther",
-                versionLabel: "v1.3.2 • 2026-03-14",
+                versionLabel: "v1.3.3 • 2026-03-14",
                 welcomeTitle: "Welcome to Reticula-Atelier",
                 welcomeDesc: "Transform your Zentangle® drawings into fascinating, seamless kaleidoscope patterns for your art projects.",
                 welcomeStep1: "Upload",
@@ -812,6 +829,8 @@
                 zoomLabel: "Tamaño (Zoom)",
                 horizontalLabel: "Horizontal",
                 verticalLabel: "Vertical",
+                perspHLabel: "Persp. Horiz.",
+                perspVLabel: "Persp. Vert.",
                 brightnessLabel: "Brillo",
                 contrastLabel: "Contraste",
                 saturationLabel: "Saturación",
@@ -827,7 +846,7 @@
                 supportText: "Esta aplicación es de uso gratuito. Si aprecias el trabajo y quieres apoyar su desarrollo, te agradecería una pequeña donación.",
                 privacyText: "Privacidad: Tus imágenes nunca se suben a un servidor. Todo el procesamiento ocurre de forma segura y local en tu navegador.",
                 author: "Creado por Ulrike Günther",
-                versionLabel: "v1.3.2 • 14.03.2026",
+                versionLabel: "v1.3.3 • 14.03.2026",
                 welcomeTitle: "Bienvenido a Reticula-Atelier",
                 welcomeDesc: "Transforma tus dibujos Zentangle® en fascinantes patrones de caleidoscopio sin costuras para tus proyectos artísticos.",
                 welcomeStep1: "Subir",
@@ -891,6 +910,8 @@
             document.getElementById('ui-zoom-label').innerText = t.zoomLabel;
             document.getElementById('ui-horizontal-label').innerText = t.horizontalLabel;
             document.getElementById('ui-vertical-label').innerText = t.verticalLabel;
+            document.getElementById('ui-persp-h-label').innerText = t.perspHLabel;
+            document.getElementById('ui-persp-v-label').innerText = t.perspVLabel;
             document.getElementById('ui-brightness-label').innerText = t.brightnessLabel;
             document.getElementById('ui-contrast-label').innerText = t.contrastLabel;
             document.getElementById('ui-saturation-label').innerText = t.saturationLabel;
@@ -976,6 +997,7 @@
         let currentRotation = 0;
         let currentZoom = 1.0;
         let currentOffX = 0, currentOffY = 0, sourceRotation = 0;
+        let currentPerspH = 0, currentPerspV = 0;
         let filters = { brightness: 100, contrast: 100, saturation: 100, warmth: 0, thresholdActive: false, thresholdValue: 128 };
         let renderPending = false;
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -1065,7 +1087,11 @@
         function updateSourceBuffer() {
             if (!rawImg) return;
             psCtx.clearRect(0, 0, 800, 800); psCtx.save();
-            psCtx.translate(400, 400); psCtx.rotate(sourceRotation * Math.PI / 180); psCtx.scale(currentZoom, currentZoom);
+            psCtx.translate(400, 400); 
+            psCtx.rotate(sourceRotation * Math.PI / 180); 
+            psCtx.scale(currentZoom, currentZoom);
+            // Anwendung der Perspektive (Skew)
+            psCtx.transform(1, currentPerspV, currentPerspH, 1, 0, 0);
             psCtx.translate((currentOffX/100)*800/currentZoom, (currentOffY/100)*800/currentZoom); psCtx.translate(-400, -400);
             const aspect = rawImg.width / rawImg.height;
             let dw, dh; if (aspect > 1) { dh = 800; dw = dh * aspect; } else { dw = 800; dh = dw / aspect; }
@@ -1113,6 +1139,7 @@
         const srcRotS = document.getElementById("src-rotation-slider"), srcRotI = document.getElementById("src-rotation-input");
         const srcZmS = document.getElementById("src-zoom-slider"), srcZmI = document.getElementById("src-zoom-input");
         const srcOffX = document.getElementById("src-offx-slider"), srcOffY = document.getElementById("src-offy-slider");
+        const srcPerspH = document.getElementById("src-persp-h-slider"), srcPerspV = document.getElementById("src-persp-v-slider");
 
         function sync(s, i, cb, fl = false) {
             s.oninput = (e) => { const v = fl ? parseFloat(e.target.value) : parseInt(e.target.value); if(i) i.value = fl ? v.toFixed(2) : v; cb(v); };
@@ -1123,6 +1150,9 @@
         sync(srcZmS, srcZmI, (v) => { currentZoom = v; scheduleUpdate(); }, true);
         srcOffX.oninput = (e) => { currentOffX = parseFloat(e.target.value); scheduleUpdate(); };
         srcOffY.oninput = (e) => { currentOffY = parseFloat(e.target.value); scheduleUpdate(); };
+        srcPerspH.oninput = (e) => { currentPerspH = parseFloat(e.target.value); scheduleUpdate(); };
+        srcPerspV.oninput = (e) => { currentPerspV = parseFloat(e.target.value); scheduleUpdate(); };
+        
         sync(gridSizeInput, gridNumberInput, () => scheduleUpdate());
         sync(optBrightness, document.getElementById("opt-brightness-input"), (v) => { filters.brightness = v; scheduleUpdate(); });
         sync(optContrast, document.getElementById("opt-contrast-input"), (v) => { filters.contrast = v; scheduleUpdate(); });
@@ -1170,7 +1200,16 @@
             lucide.createIcons();
         };
 
-        resetSourceBtn.onclick = () => { const t = i18n[currentLang]; sourceRotation = 0; currentZoom = 1.0; currentOffX = 0; currentOffY = 0; srcRotS.value = 0; srcRotI.value = "0.0"; srcZmS.value = 1.0; srcZmI.value = "1.00"; srcOffX.value = 0; srcOffY.value = 0; scheduleUpdate(); showNotification(t.reset); };
+        resetSourceBtn.onclick = () => { 
+            const t = i18n[currentLang]; 
+            sourceRotation = 0; currentZoom = 1.0; currentOffX = 0; currentOffY = 0; 
+            currentPerspH = 0; currentPerspV = 0;
+            srcRotS.value = 0; srcRotI.value = "0.0"; srcZmS.value = 1.0; srcZmI.value = "1.00"; 
+            srcOffX.value = 0; srcOffY.value = 0;
+            srcPerspH.value = 0; srcPerspV.value = 0;
+            scheduleUpdate(); 
+            showNotification(t.reset); 
+        };
 
         modeBtns.forEach(btn => btn.onclick = () => { modeBtns.forEach(b => b.className = "mode-btn bg-[#f4ede0] border border-[#d1c2a8] text-[#8b7355] py-1.5 rounded-lg text-[8px] font-bold uppercase hover:bg-[#eee4d1]"); btn.className = "mode-btn active btn-export py-1.5 rounded-lg text-[8px] shadow-sm"; currentMode = btn.dataset.mode; scheduleUpdate(); });
 
