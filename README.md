@@ -53,3 +53,17 @@ Die öffentliche Seite wurde bei 1280 × 720 und 390 × 844 visuell geprüft;
 der rote Hinweis und der App-Store-Knopf sind vollständig sichtbar.
 Alle drei Sprachen wurden über die Sprachknöpfe geprüft. JavaScript-Syntax
 und Git-Diff sind ebenfalls geprüft.
+
+## Sprachwahl und offizielles App-Store-Badge (21.10.2026)
+
+Direkt im roten Banner stehen zusätzlich die ausgeschriebenen Sprachknöpfe
+Deutsch / English / Español. Sie schalten die gesamte Webseite um und markieren
+die gewählte Sprache. Die bisherigen DE-/EN-/ES-Knöpfe bleiben erhalten.
+Der bisherige Textknopf ist durch Apples offizielles schwarzes Download-Badge
+ersetzt. Das Badge wechselt ebenfalls zwischen Deutsch, Englisch und Spanisch.
+Die unveränderten SVG-Dateien liegen in `assets/app-store-{de,en,es}.svg`.
+Quelle: `https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/`
+mit den Sprachen `de-de`, `en-us`, `es-es`.
+Richtlinien: https://developer.apple.com/app-store/marketing/guidelines/
+Darstellung: 48 Pixel hoch, unverzerrt, mit mindestens 12 Pixel Freiraum.
+JavaScript-Syntax, SVG-Dateien und Git-Diff geprüft; Live-Sichtprüfung folgt.

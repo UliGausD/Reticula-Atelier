@@ -53,10 +53,10 @@
         .retirement-notice p { font-size: 14px; line-height: 1.5; margin: 0; max-width: 900px; }
         .retirement-notice a {
             grid-column: 2;
-            grid-row: 1 / 3;
-            background: #ffffff;
-            color: #8b1d1d;
-            padding: 14px 20px;
+            grid-row: 2 / 4;
+            background: transparent;
+            color: white;
+            padding: 12px;
             border-radius: 10px;
             font-size: 14px;
             font-weight: 700;
@@ -64,7 +64,12 @@
             text-decoration: underline;
             text-underline-offset: 3px;
         }
-        .retirement-notice a:hover { background: #ffebeb; }
+        .retirement-notice a:hover { background: #ffffff18; }
+        .retirement-notice img { display: block; width: auto; height: 48px; }
+        .notice-languages { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+        .notice-language { border: 1px solid #ffffff99; border-radius: 6px; padding: 5px 12px; color: white; background: transparent; font-size: 13px; }
+        .notice-language[aria-pressed="true"] { background: white; color: #8b1d1d; font-weight: 700; }
+        .notice-language:focus-visible { outline: 3px solid white; outline-offset: 3px; }
         .retirement-notice a:focus-visible { outline: 3px solid white; outline-offset: 4px; }
         .atelier-workspace { display: flex; flex: 1; min-height: 0; min-width: 0; }
         .atelier-workspace > aside, .atelier-workspace > main { height: 100%; }
@@ -72,7 +77,7 @@
             .retirement-notice { display: block; padding: 14px 20px; max-height: 42dvh; overflow-y: auto; }
             .retirement-notice h2 { font-size: 20px; }
             .retirement-notice p { font-size: 12px; }
-            .retirement-notice a { display: inline-block; margin-top: 12px; padding: 10px 14px; font-size: 13px; }
+            .retirement-notice a { display: inline-block; margin-top: 12px; padding: 12px; font-size: 13px; }
             .atelier-workspace { flex-direction: column; }
             .atelier-workspace > aside { height: 45%; }
             .atelier-workspace > main { height: auto; min-height: 0; }
@@ -306,9 +311,14 @@
 <body class="flex flex-col h-screen overflow-hidden">
 
             <section class="retirement-notice" aria-labelledby="ui-retirement-title">
+                <nav class="notice-languages" aria-label="Sprache / Language / Idioma">
+                    <button type="button" class="notice-language" data-notice-lang="de" lang="de" aria-pressed="true" onclick="setLanguage('de')">Deutsch</button>
+                    <button type="button" class="notice-language" data-notice-lang="en" lang="en" aria-pressed="false" onclick="setLanguage('en')">English</button>
+                    <button type="button" class="notice-language" data-notice-lang="es" lang="es" aria-pressed="false" onclick="setLanguage('es')">Español</button>
+                </nav>
                 <h2 id="ui-retirement-title">Reticula Atelier wird bald abgeschaltet</h2>
                 <p id="ui-retirement-text">Danke, dass du Reticula Atelier nutzt! Diese Webseite wird bald abgeschaltet. Mit KaleidoTangle kannst du deine Muster jetzt in einer kostenlosen App für das iPhone gestalten. Bis zur Abschaltung kannst du diese Seite weiter nutzen.</p>
-                <a id="ui-retirement-link" href="https://apps.apple.com/app/kaleidotangle/id6820617420" target="_blank" rel="noopener noreferrer">KaleidoTangle im App Store laden</a>
+                <a id="ui-retirement-link" href="https://apps.apple.com/app/kaleidotangle/id6820617420" target="_blank" rel="noopener noreferrer" aria-label="KaleidoTangle im App Store laden"><img id="ui-app-store-badge" src="assets/app-store-de.svg" height="48" alt="KaleidoTangle im App Store laden"></a>
             </section>
 
     <div class="atelier-workspace">
@@ -958,7 +968,13 @@
             document.documentElement.lang = currentLang;
             document.getElementById('ui-retirement-title').textContent = t.retirementTitle;
             document.getElementById('ui-retirement-text').textContent = t.retirementText;
-            document.getElementById('ui-retirement-link').textContent = t.retirementLink;
+            document.getElementById('ui-retirement-link').setAttribute('aria-label', t.retirementLink);
+            const appStoreBadge = document.getElementById('ui-app-store-badge');
+            appStoreBadge.src = `assets/app-store-${currentLang}.svg`;
+            appStoreBadge.alt = t.retirementLink;
+            document.querySelectorAll('[data-notice-lang]').forEach(button => {
+                button.setAttribute('aria-pressed', String(button.dataset.noticeLang === currentLang));
+            });
             document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`lang-${currentLang}`).classList.add('active');
 
