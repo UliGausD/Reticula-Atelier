@@ -11,7 +11,8 @@ Ulrike möchte die Webseite künftig abschalten, da KaleidoTangle als native
 kostenlose iPhone-App verfügbar ist. Ein Abschaltdatum ist noch nicht festgelegt.
 Bis dahin bleiben die bisherigen Webseitenfunktionen verfügbar.
 
-Am Anfang des Einstellungsbereichs steht ein sichtbarer Hinweis auf die baldige
+Über die gesamte Seitenbreite steht oberhalb von Menü und Arbeitsbereich ein
+roter Hinweis mit weißer Schrift und hervorgehobenem App-Store-Knopf auf die baldige
 Abschaltung mit einem Link zum App Store. Titel, Erklärung und Linkbeschriftung
 wechseln mit der vorhandenen Sprachwahl DE / EN / ES. Der Hinweis nennt ausdrücklich
 das iPhone; eine Android-Version wird nicht angekündigt. Ohne JavaScript ist der
@@ -41,3 +42,11 @@ Noch nichts löschen oder deaktivieren. Abschalttermin und tatsächliche Abschal
 werden von Ulrike gesondert beauftragt. Vor dem Entfernen prüfen, ob außer GitHub
 Pages noch eine Netlify-Veröffentlichung existiert, und die gewünschte Aufbewahrung
 des Quellcodes klären.
+
+## Deutlicherer Hinweis (21.10.2026)
+
+Auf Ulrikes Wunsch wurde der Hinweis aus der linken Menüleiste herausgenommen
+und als rotes Banner über Menü und Arbeitsbereich gesetzt. Auf schmalen Geräten
+stehen Text und Knopf untereinander; der verbleibende Platz wird weiterhin
+zwischen Einstellungen und Vorschau aufgeteilt. Veröffentlichung und Sichtprüfung
+dieser Überarbeitung werden nach dem Deployment bestätigt.
