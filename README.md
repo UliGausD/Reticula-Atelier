@@ -48,5 +48,8 @@ des Quellcodes klären.
 Auf Ulrikes Wunsch wurde der Hinweis aus der linken Menüleiste herausgenommen
 und als rotes Banner über Menü und Arbeitsbereich gesetzt. Auf schmalen Geräten
 stehen Text und Knopf untereinander; der verbleibende Platz wird weiterhin
-zwischen Einstellungen und Vorschau aufgeteilt. Veröffentlichung und Sichtprüfung
-dieser Überarbeitung werden nach dem Deployment bestätigt.
+zwischen Einstellungen und Vorschau aufgeteilt. GitHub Pages hat die Überarbeitung (`b81cc92`) erfolgreich veröffentlicht.
+Die öffentliche Seite wurde bei 1280 × 720 und 390 × 844 visuell geprüft;
+der rote Hinweis und der App-Store-Knopf sind vollständig sichtbar.
+Alle drei Sprachen wurden über die Sprachknöpfe geprüft. JavaScript-Syntax
+und Git-Diff sind ebenfalls geprüft.
