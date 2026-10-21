@@ -29,8 +29,11 @@ Prüfung am 21.10.2026: JavaScript-Syntax mit `node --check` erfolgreich,
 alle drei Übersetzungen und eindeutige HTML-IDs geprüft, Git-Diff geprüft.
 App-Store-Link liefert nach Weiterleitung HTTP 200.
 Eine lokale Browser-Vorschau über `file:` wurde vom Browserwerkzeug blockiert.
-Der Veröffentlichungsstand und die Prüfung der öffentlichen Seite werden nach
-GitHub-Pages-Deployment ergänzt.
+GitHub Pages hat Commit `ca41a6f` erfolgreich veröffentlicht. Die öffentliche Seite
+wurde im Browser geprüft: Hinweis auf Deutsch, Englisch und Spanisch durch
+Bedienen der Sprachwahl bestätigt. Sichtprüfung bei 1280 × 720 und 390 × 844:
+Hinweis und App-Store-Link vollständig sichtbar. Die bisherigen
+Bildbearbeitungsfunktionen wurden nicht erneut vollständig getestet.
 
 ## Spätere Abschaltung
 
