@@ -36,6 +36,30 @@
             touch-action: manipulation;
         }
 
+        .retirement-notice {
+            background: #fff8e9;
+            border: 1px solid #8b7355;
+            border-radius: 12px;
+            padding: 14px;
+            color: #574438;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .retirement-notice h2 { font-size: 15px; font-weight: 700; margin: 0 0 6px; }
+        .retirement-notice p { margin: 0 0 12px; }
+        .retirement-notice a {
+            display: inline-block;
+            background: #574438;
+            color: #fff8e9;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .retirement-notice a:hover { background: #725e45; }
+        .retirement-notice a:focus-visible { outline: 3px solid #574438; outline-offset: 3px; }
+
         .sidebar-scroll {
             overflow-y: auto;
             scrollbar-width: thin;
@@ -297,6 +321,13 @@
         </div>
 
         <div class="sidebar-scroll flex-1 p-6 pt-1 space-y-4">
+
+            <section class="retirement-notice" aria-labelledby="ui-retirement-title">
+                <h2 id="ui-retirement-title">Reticula Atelier wird bald abgeschaltet</h2>
+                <p id="ui-retirement-text">Danke, dass du Reticula Atelier nutzt! Diese Webseite wird bald abgeschaltet. Mit KaleidoTangle kannst du deine Muster jetzt in einer kostenlosen App für das iPhone gestalten. Bis zur Abschaltung kannst du diese Seite weiter nutzen.</p>
+                <a id="ui-retirement-link" href="https://apps.apple.com/app/kaleidotangle/id6820617420" target="_blank" rel="noopener noreferrer">KaleidoTangle im App Store laden</a>
+            </section>
+
             
             <!-- SCHRITT 1 -->
             <section class="space-y-2">
@@ -683,6 +714,9 @@
         // Translations
         const i18n = {
             de: {
+                retirementTitle: "Reticula Atelier wird bald abgeschaltet",
+                retirementText: "Danke, dass du Reticula Atelier nutzt! Diese Webseite wird bald abgeschaltet. Mit KaleidoTangle kannst du deine Muster jetzt in einer kostenlosen App für das iPhone gestalten. Bis zur Abschaltung kannst du diese Seite weiter nutzen.",
+                retirementLink: "KaleidoTangle im App Store laden",
                 subtitle: "Erstelle ein Kaleidoskop aus deiner Zentangle-Zeichnung",
                 step1: "1. Bild wählen",
                 step2: "2. Muster gestalten",
@@ -749,6 +783,9 @@
                 pdfFooter: "Erstellt mit Reticula-Atelier"
             },
             en: {
+                retirementTitle: "Reticula Atelier is closing soon",
+                retirementText: "Thank you for using Reticula Atelier! This website will be shut down soon. You can now create your patterns with KaleidoTangle, a free app for iPhone. You can continue using this website until it closes.",
+                retirementLink: "Download KaleidoTangle on the App Store",
                 subtitle: "Create a kaleidoscope from your Zentangle drawing",
                 step1: "1. Select Image",
                 step2: "2. Design Pattern",
@@ -815,6 +852,9 @@
                 pdfFooter: "Created with Reticula-Atelier"
             },
             es: {
+                retirementTitle: "Reticula Atelier cerrará pronto",
+                retirementText: "¡Gracias por usar Reticula Atelier! Esta web dejará de estar disponible pronto. Ahora puedes crear tus patrones con KaleidoTangle, una app gratuita para iPhone. Puedes seguir utilizando esta web hasta su cierre.",
+                retirementLink: "Descargar KaleidoTangle en el App Store",
                 subtitle: "Crea un caleidoscopio a partir de tu dibujo Zentangle",
                 step1: "1. Elegir Imagen",
                 step2: "2. Diseñar Patrón",
@@ -892,6 +932,10 @@
 
         function updateUI() {
             const t = i18n[currentLang];
+            document.documentElement.lang = currentLang;
+            document.getElementById('ui-retirement-title').textContent = t.retirementTitle;
+            document.getElementById('ui-retirement-text').textContent = t.retirementText;
+            document.getElementById('ui-retirement-link').textContent = t.retirementLink;
             document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`lang-${currentLang}`).classList.add('active');
 
