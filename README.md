@@ -66,4 +66,7 @@ Quelle: `https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-
 mit den Sprachen `de-de`, `en-us`, `es-es`.
 Richtlinien: https://developer.apple.com/app-store/marketing/guidelines/
 Darstellung: 48 Pixel hoch, unverzerrt, mit mindestens 12 Pixel Freiraum.
-JavaScript-Syntax, SVG-Dateien und Git-Diff geprüft; Live-Sichtprüfung folgt.
+JavaScript-Syntax, SVG-Dateien und Git-Diff geprüft. Öffentlich veröffentlicht
+und im Browser bei 1280 × 720 und 390 × 844 geprüft: Sprachknöpfe sichtbar,
+Umschaltung in alle drei Sprachen funktioniert, lokalisierte Badge-Dateien
+werden erfolgreich geladen. Deutsches Badge auf beiden Größen visuell bestätigt.
